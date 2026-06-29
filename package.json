@@ -11,5 +11,8 @@
     "dev:app": "npm run dev --workspace=app",
     "build": "npm run build --workspace=app",
     "install:all": "npm install --workspaces"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
   }
 }
