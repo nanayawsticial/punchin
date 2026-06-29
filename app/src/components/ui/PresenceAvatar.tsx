@@ -17,17 +17,21 @@ export function PresenceAvatar({ name, avatar, status, size = 36 }: PresenceAvat
   else if (status === 'ON_LEAVE') ringClass = 'leave';
   else if (status === 'OFFLINE') ringClass = 'absent';
 
-  const initials = name
-    .split(' ')
-    .map(n => n.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const isUrl = avatar && (avatar.startsWith('http') || avatar.startsWith('/') || avatar.includes('.'));
+  
+  const initials = avatar && !isUrl && avatar.length <= 4
+    ? avatar
+    : name
+        .split(' ')
+        .map(n => n.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
 
   return (
     <div className="avatar-wrap" style={{ width: size, height: size }}>
       <div className={`avatar-ring ${ringClass}`} />
-      {avatar ? (
+      {avatar && isUrl ? (
         <img
           src={avatar}
           alt={name}

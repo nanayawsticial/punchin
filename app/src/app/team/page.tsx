@@ -4,9 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PresenceAvatar } from '@/components/ui/PresenceAvatar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { departmentsApi, attendanceApi } from '@/lib/api';
-import type { Department, PresenceData, User } from '@/types';
-import { Search, Grid, List, MapPin } from 'lucide-react';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { departmentsApi, attendanceApi, usersApi } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/components/ui/Toast';
+import type { Department, User } from '@/types';
+import { Search, Grid, List, Edit2, User as UserIcon, Phone, Mail, Save } from 'lucide-react';
 
 interface TeamMember {
   id: string;
@@ -19,6 +22,9 @@ interface TeamMember {
 }
 
 export default function TeamPage() {
+  const { user: currentUser } = useAuth();
+  const { showToast } = useToast();
+  
   const [departments, setDepartments] = useState<Department[]>([]);
   const [activeDept, setActiveDept] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
@@ -27,81 +33,140 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<TeamMember[]>([]);
 
+  // Edit states
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    employeeCode: '',
+    role: '',
+    status: '',
+    departmentId: ''
+  });
+  const [fetchingUser, setFetchingUser] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const canEdit = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
+
+  const loadTeamData = async () => {
+    setLoading(true);
+    try {
+      const [depts, presence] = await Promise.all([
+        departmentsApi.list(),
+        attendanceApi.presence()
+      ]);
+      setDepartments(depts);
+
+      // Map presence data to simple list
+      const list: TeamMember[] = [];
+
+      // Present
+      presence.present.forEach((p: any) => {
+        list.push({
+          id: p.user.id,
+          name: p.user.name,
+          avatar: p.user.avatar,
+          departmentName: p.user.department?.name || 'General',
+          departmentColor: p.user.department?.color || '#E8603C',
+          status: p.status,
+          clockInTime: p.clockIn
+        });
+      });
+
+      // Late
+      presence.late.forEach((p: any) => {
+        list.push({
+          id: p.user.id,
+          name: p.user.name,
+          avatar: p.user.avatar,
+          departmentName: p.user.department?.name || 'General',
+          departmentColor: p.user.department?.color || '#E8603C',
+          status: 'LATE',
+          clockInTime: p.clockIn
+        });
+      });
+
+      // On Leave
+      presence.onLeave.forEach((p: any) => {
+        list.push({
+          id: p.user.id,
+          name: p.user.name,
+          avatar: p.user.avatar,
+          departmentName: p.user.department?.name || 'General',
+          departmentColor: p.user.department?.color || '#E8603C',
+          status: 'ON_LEAVE',
+          clockInTime: null
+        });
+      });
+
+      // Absent
+      presence.absent.forEach((u: User) => {
+        list.push({
+          id: u.id,
+          name: u.name,
+          avatar: u.avatar,
+          departmentName: u.department?.name || 'General',
+          departmentColor: u.department?.color || '#E8603C',
+          status: 'ABSENT',
+          clockInTime: null
+        });
+      });
+
+      setMembers(list.sort((a, b) => a.name.localeCompare(b.name)));
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to load team data.', 'danger');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadTeamData = async () => {
-      setLoading(true);
-      try {
-        const [depts, presence] = await Promise.all([
-          departmentsApi.list(),
-          attendanceApi.presence()
-        ]);
-        setDepartments(depts);
-
-        // Map presence data to simple list
-        const list: TeamMember[] = [];
-
-        // Present
-        presence.present.forEach((p: any) => {
-          list.push({
-            id: p.user.id,
-            name: p.user.name,
-            avatar: p.user.avatar,
-            departmentName: p.user.department?.name || 'General',
-            departmentColor: p.user.department?.color || '#E8603C',
-            status: p.status,
-            clockInTime: p.clockIn
-          });
-        });
-
-        // Late
-        presence.late.forEach((p: any) => {
-          list.push({
-            id: p.user.id,
-            name: p.user.name,
-            avatar: p.user.avatar,
-            departmentName: p.user.department?.name || 'General',
-            departmentColor: p.user.department?.color || '#E8603C',
-            status: 'LATE',
-            clockInTime: p.clockIn
-          });
-        });
-
-        // On Leave
-        presence.onLeave.forEach((p: any) => {
-          list.push({
-            id: p.user.id,
-            name: p.user.name,
-            avatar: p.user.avatar,
-            departmentName: p.user.department?.name || 'General',
-            departmentColor: p.user.department?.color || '#E8603C',
-            status: 'ON_LEAVE',
-            clockInTime: null
-          });
-        });
-
-        // Absent
-        presence.absent.forEach((u: User) => {
-          list.push({
-            id: u.id,
-            name: u.name,
-            avatar: u.avatar,
-            departmentName: u.department?.name || 'General',
-            departmentColor: u.department?.color || '#E8603C',
-            status: 'ABSENT',
-            clockInTime: null
-          });
-        });
-
-        setMembers(list.sort((a, b) => a.name.localeCompare(b.name)));
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadTeamData();
   }, []);
+
+  const handleEditClick = async (member: TeamMember) => {
+    setEditingMember(member);
+    setIsEditSheetOpen(true);
+    setFetchingUser(true);
+    try {
+      const userDetails = await usersApi.get(member.id);
+      setEditForm({
+        name: userDetails.name || '',
+        email: userDetails.email || '',
+        phone: userDetails.phone || '',
+        employeeCode: userDetails.employeeCode || '',
+        role: userDetails.role || 'EMPLOYEE',
+        status: userDetails.status || 'ACTIVE',
+        departmentId: userDetails.departmentId || ''
+      });
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to load user details.', 'danger');
+      setIsEditSheetOpen(false);
+    } finally {
+      setFetchingUser(false);
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMember) return;
+    setSaving(true);
+    try {
+      await usersApi.update(editingMember.id, editForm);
+      showToast('Employee profile updated successfully!', 'success');
+      setIsEditSheetOpen(false);
+      loadTeamData();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.response?.data?.message || 'Failed to update employee profile.', 'danger');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Filter members
   const filtered = members.filter((m) => {
@@ -216,7 +281,7 @@ export default function TeamPage() {
               <div
                 key={m.id}
                 className="card flex flex-col items-center justify-center text-center gap-3"
-                style={{ position: 'relative' }}
+                style={{ position: 'relative', minHeight: 180 }}
               >
                 {/* Department strip tag */}
                 <div
@@ -231,13 +296,34 @@ export default function TeamPage() {
                   }}
                 />
 
+                {canEdit && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditClick(m);
+                    }}
+                    className="btn btn-ghost"
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      padding: 6,
+                      minHeight: 0,
+                      borderRadius: '50%',
+                      color: 'var(--text-3)'
+                    }}
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                )}
+
                 <PresenceAvatar name={m.name} avatar={m.avatar} status={m.status} size={64} />
 
                 <div>
-                  <div className="font-bold truncate" style={{ fontSize: 'var(--text-sm)', maxWidth: 140 }}>
+                  <div className="font-bold truncate" style={{ fontSize: 'var(--text-sm)', maxWidth: 140, color: 'var(--text-1)' }}>
                     {m.name}
                   </div>
-                  <div className="text-muted truncate" style={{ fontSize: 10, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div className="text-muted truncate" style={{ fontSize: 10, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-3)' }}>
                     {m.departmentName}
                   </div>
                 </div>
@@ -245,7 +331,7 @@ export default function TeamPage() {
                 <StatusBadge status={m.status} />
 
                 {m.clockInTime && (
-                  <div className="text-muted" style={{ fontSize: 10 }}>
+                  <div className="text-muted" style={{ fontSize: 10, color: 'var(--text-3)' }}>
                     Clocked in: {new Date(m.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 )}
@@ -259,10 +345,10 @@ export default function TeamPage() {
                 <div className="flex items-center gap-3">
                   <PresenceAvatar name={m.name} avatar={m.avatar} status={m.status} size={40} />
                   <div>
-                    <div className="font-bold" style={{ fontSize: 'var(--text-sm)' }}>
+                    <div className="font-bold" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)' }}>
                       {m.name}
                     </div>
-                    <div className="text-muted" style={{ fontSize: 'var(--text-xs)' }}>
+                    <div className="text-muted" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
                       {m.departmentName}
                     </div>
                   </div>
@@ -270,9 +356,18 @@ export default function TeamPage() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   {m.clockInTime && (
-                    <div className="text-muted" style={{ fontSize: 'var(--text-xs)' }}>
+                    <div className="text-muted" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
                       In: {new Date(m.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
+                  )}
+                  {canEdit && (
+                    <button
+                      onClick={() => handleEditClick(m)}
+                      className="btn btn-ghost"
+                      style={{ padding: 6, minHeight: 0, borderRadius: '50%', color: 'var(--text-3)' }}
+                    >
+                      <Edit2 size={16} />
+                    </button>
                   )}
                   <StatusBadge status={m.status} />
                 </div>
@@ -280,6 +375,145 @@ export default function TeamPage() {
             ))}
           </div>
         )}
+
+        {/* Edit Employee Drawer */}
+        <BottomSheet
+          isOpen={isEditSheetOpen}
+          onClose={() => setIsEditSheetOpen(false)}
+          title="Edit Employee Profile"
+          subtitle="Manage role, status and department"
+        >
+          {fetchingUser ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+              <div className="btn-spinner" style={{ width: 36, height: 36, borderTopColor: 'var(--accent)' }} />
+            </div>
+          ) : (
+            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="input-group">
+                <label className="input-label" htmlFor="editName">Full Name</label>
+                <div style={{ position: 'relative' }}>
+                  <UserIcon size={16} style={{ position: 'absolute', left: 16, top: 18, color: 'var(--text-3)' }} />
+                  <input
+                    id="editName"
+                    type="text"
+                    className="input"
+                    style={{ paddingLeft: 44 }}
+                    required
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label" htmlFor="editEmail">Email Address</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={16} style={{ position: 'absolute', left: 16, top: 18, color: 'var(--text-3)' }} />
+                  <input
+                    id="editEmail"
+                    type="email"
+                    className="input"
+                    style={{ paddingLeft: 44 }}
+                    required
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label" htmlFor="editPhone">Phone Number</label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={16} style={{ position: 'absolute', left: 16, top: 18, color: 'var(--text-3)' }} />
+                  <input
+                    id="editPhone"
+                    type="tel"
+                    className="input"
+                    style={{ paddingLeft: 44 }}
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid-2">
+                <div className="input-group">
+                  <label className="input-label" htmlFor="editCode">Employee Code</label>
+                  <input
+                    id="editCode"
+                    type="text"
+                    className="input"
+                    required
+                    value={editForm.employeeCode}
+                    onChange={(e) => setEditForm({ ...editForm, employeeCode: e.target.value })}
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label" htmlFor="editDept">Department</label>
+                  <select
+                    id="editDept"
+                    className="input"
+                    style={{ height: 52 }}
+                    value={editForm.departmentId}
+                    onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+                  >
+                    <option value="">No Department</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid-2">
+                <div className="input-group">
+                  <label className="input-label" htmlFor="editRole">System Role</label>
+                  <select
+                    id="editRole"
+                    className="input"
+                    style={{ height: 52 }}
+                    required
+                    value={editForm.role}
+                    onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  >
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                  </select>
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label" htmlFor="editStatus">Status</label>
+                  <select
+                    id="editStatus"
+                    className="input"
+                    style={{ height: 52 }}
+                    required
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="SUSPENDED">Suspended</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn btn-primary"
+                style={{ width: '100%', marginTop: 8 }}
+              >
+                {saving ? <div className="btn-spinner" /> : <><Save size={18} /> Save Profile</>}
+              </button>
+            </form>
+          )}
+        </BottomSheet>
       </div>
     </PageWrapper>
   );

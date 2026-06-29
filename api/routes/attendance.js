@@ -82,7 +82,6 @@ async function attendanceRoutes(fastify, options) {
     const employees = await prisma.user.findMany({
       where: {
         organizationId,
-        role: 'EMPLOYEE',
         status: 'ACTIVE'
       },
       include: {
