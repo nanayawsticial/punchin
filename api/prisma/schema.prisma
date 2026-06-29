@@ -63,15 +63,15 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users             User[]             @relation(onDelete: Cascade)
-  departments       Department[]       @relation(onDelete: Cascade)
-  attendanceRecords AttendanceRecord[] @relation(onDelete: Cascade)
-  biometricDevices  BiometricDevice[]  @relation(onDelete: Cascade)
-  geoFenceZones     GeoFenceZone[]     @relation(onDelete: Cascade)
-  leaveRequests     LeaveRequest[]     @relation(onDelete: Cascade)
-  shifts            Shift[]            @relation(onDelete: Cascade)
-  notifications     Notification[]     @relation(onDelete: Cascade)
-  publicHolidays    PublicHoliday[]    @relation(onDelete: Cascade)
+  users             User[]             
+  departments       Department[]       
+  attendanceRecords AttendanceRecord[] 
+  biometricDevices  BiometricDevice[]  
+  geoFenceZones     GeoFenceZone[]     
+  leaveRequests     LeaveRequest[]     
+  shifts            Shift[]            
+  notifications     Notification[]     
+  publicHolidays    PublicHoliday[]    
 }
 
 model User {
@@ -93,11 +93,11 @@ model User {
 
   organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   department        Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  sessions          Session[]          @relation(onDelete: Cascade)
-  attendanceRecords AttendanceRecord[] @relation(onDelete: Cascade)
-  deviceSyncLogs    DeviceSyncLog[]    @relation(onDelete: SetNull)
-  leaveRequests     LeaveRequest[]     @relation(onDelete: Cascade)
-  shifts            Shift[]            @relation(onDelete: Cascade)
+  sessions          Session[]          
+  attendanceRecords AttendanceRecord[] 
+  deviceSyncLogs    DeviceSyncLog[]    
+  leaveRequests     LeaveRequest[]     
+  shifts            Shift[]            
 }
 
 model Department {
@@ -166,7 +166,7 @@ model BiometricDevice {
   updatedAt        DateTime     @updatedAt
 
   organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  syncLogs     DeviceSyncLog[] @relation(onDelete: Cascade)
+  syncLogs     DeviceSyncLog[] 
 }
 
 model DeviceSyncLog {
