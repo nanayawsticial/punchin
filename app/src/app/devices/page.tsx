@@ -54,20 +54,11 @@ export default function DevicesPage() {
     fetchDevices();
   }, []);
 
-  const triggerPairing = async () => {
+  const triggerPairing = () => {
     setPairingCode(null);
-    setPairingStatus('Requesting pairing code from server...');
+    setConfirmForm({ code: '', name: '', location: '' });
+    setPairingStatus('Enter the 6-digit code shown on your Pico screen and specify a name/location.');
     setIsPairingSheetOpen(true);
-    try {
-      const res = await devicesApi.pairingCode();
-      setPairingCode(res.code);
-      setConfirmForm(prev => ({ ...prev, code: res.code }));
-      setPairingStatus('Code generated! Please enter terminal name to complete registration.');
-    } catch (e) {
-      console.error(e);
-      setPairingStatus('Failed to generate pairing code. Make sure server is online.');
-      showToast('Pairing request failed.', 'danger');
-    }
   };
 
   const handleConfirmPair = async (e: React.FormEvent) => {
@@ -188,31 +179,26 @@ export default function DevicesPage() {
           title="Pair Physical Device"
           subtitle="Link RFID Terminal Ecosystem"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {pairingCode && (
-              <div
-                style={{
-                  background: 'var(--accent-soft)',
-                  border: '1.5px dashed var(--accent)',
-                  padding: 16,
-                  borderRadius: 'var(--radius-md)',
-                  textAlign: 'center'
-                }}
-              >
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--accent-text)', fontWeight: 700, textTransform: 'uppercase' }}>
-                  Enter this code on Pico Pairing screen
-                </div>
-                <div className="mono" style={{ fontSize: 36, fontWeight: 800, color: 'var(--accent)', marginTop: 8 }}>
-                  {pairingCode.slice(0, 3)} {pairingCode.slice(3)}
-                </div>
-              </div>
-            )}
-
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', lineHeight: 1.5 }}>
               💡 {pairingStatus}
             </div>
 
             <form onSubmit={handleConfirmPair} style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
+              <div className="input-group">
+                <label className="input-label" htmlFor="pairingCode">Pairing Code</label>
+                <input
+                  id="pairingCode"
+                  name="code"
+                  type="text"
+                  maxLength={6}
+                  placeholder="e.g. 717462"
+                  className="input"
+                  required
+                  value={confirmForm.code}
+                  onChange={(e) => setConfirmForm({ ...confirmForm, code: e.target.value.replace(/\D/g, '') })}
+                />
+              </div>
+
               <div className="input-group">
                 <label className="input-label" htmlFor="deviceName">Device Name</label>
                 <input
@@ -256,7 +242,7 @@ export default function DevicesPage() {
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ background: 'var(--warning-soft)', border: '1px solid var(--warning)', padding: 12, borderRadius: 'var(--radius-sm)', color: 'var(--warning)', fontSize: 'var(--text-xs)', lineHeight: 1.4 }}>
-              <strong>IMPORTANT:</strong> Copy this API key now. It will not be shown again for security. Place this key inside your Pico local_config.json as device_key.
+              <strong>IMPORTANT:</strong> Your Pico should automatically download this key, save it to <code>local_config.json</code>, and reboot. We show the key below only as a backup. Copy it now if you need to configure the Pico manually.
             </div>
 
             <div
