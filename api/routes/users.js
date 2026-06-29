@@ -200,35 +200,6 @@ async function userRoutes(fastify, options) {
     return { success: true, message: 'User deleted successfully' };
   });
 
-  // GET /api/departments - List departments
-  fastify.get('/departments', { preHandler: authenticate }, async (request, reply) => {
-    const organizationId = request.user.organizationId;
-    const departments = await prisma.department.findMany({
-      where: { organizationId },
-      orderBy: { name: 'asc' }
-    });
-    return departments;
-  });
-
-  // POST /api/departments - Create department
-  fastify.post('/departments', { preHandler: requireManager }, async (request, reply) => {
-    const { name, color } = request.body;
-    const organizationId = request.user.organizationId;
-
-    if (!name) {
-      return reply.status(400).send({ error: 'Bad Request', message: 'name is required' });
-    }
-
-    const dept = await prisma.department.create({
-      data: {
-        name,
-        color: color || '#E8603C',
-        organizationId
-      }
-    });
-
-    return dept;
-  });
 }
 
 module.exports = userRoutes;

@@ -34,6 +34,7 @@ fastify.get('/health', async (request, reply) => {
 
 // Register routes
 fastify.register(require('./routes/auth'), { prefix: '/api/auth' });
+fastify.register(require('./routes/departments'), { prefix: '/api/departments' });
 fastify.register(require('./routes/attendance'), { prefix: '/api/attendance' });
 fastify.register(require('./routes/devices'), { prefix: '/api/devices' });
 fastify.register(require('./routes/users'), { prefix: '/api/users' });
