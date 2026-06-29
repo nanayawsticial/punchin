@@ -7,7 +7,17 @@ const { initCronJobs } = require('./lib/cron');
 
 // Register CORS
 fastify.register(require('@fastify/cors'), {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, cb) => {
+    if (!origin || /localhost/.test(origin) || /vercel\.app$/.test(origin)) {
+      cb(null, true);
+      return;
+    }
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Not allowed"), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 });
@@ -68,7 +78,15 @@ const start = async () => {
     // Attach Socket.io to Fastify server instance
     const io = socketio(fastify.server, {
       cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: (origin, cb) => {
+          if (!origin || /localhost/.test(origin) || /vercel\.app$/.test(origin)) {
+            return cb(null, true);
+          }
+          if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+            return cb(null, true);
+          }
+          return cb(new Error("Not allowed"), false);
+        },
         methods: ['GET', 'POST'],
         credentials: true
       }
