@@ -37,7 +37,7 @@ export function DeviceCard({ device, onSync, onLogs, onDelete, onKey }: DeviceCa
           background: 'var(--accent-soft)',
           display: 'flex',
           alignItems: 'center',
-          justify-content: 'center',
+          justifyContent: 'center',
           color: 'var(--accent)',
           flexShrink: 0
         }}

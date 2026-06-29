@@ -242,7 +242,7 @@ export default function TeamPage() {
                   </div>
                 </div>
 
-                <StatusBadge status={m.status === 'OFFLINE' ? 'ABSENT' : m.status} />
+                <StatusBadge status={m.status} />
 
                 {m.clockInTime && (
                   <div className="text-muted" style={{ fontSize: 10 }}>
@@ -274,7 +274,7 @@ export default function TeamPage() {
                       In: {new Date(m.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   )}
-                  <StatusBadge status={m.status === 'OFFLINE' ? 'ABSENT' : m.status} />
+                  <StatusBadge status={m.status} />
                 </div>
               </div>
             ))}

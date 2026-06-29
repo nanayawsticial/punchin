@@ -43,7 +43,7 @@ export function PresenceAvatar({ name, avatar, status, size = 36 }: PresenceAvat
             background: 'var(--bg-elevated)',
             display: 'flex',
             alignItems: 'center',
-            justify-content: 'center',
+            justifyContent: 'center',
             fontSize: size > 40 ? 'var(--text-lg)' : 'var(--text-xs)',
             fontWeight: 700,
             color: 'var(--text-2)',

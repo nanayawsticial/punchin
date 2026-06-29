@@ -28,7 +28,7 @@ export function PageWrapper({ children, noSidebar = false }: PageWrapperProps) {
           display: 'flex',
           height: '100vh',
           alignItems: 'center',
-          justify-content: 'center',
+          justifyContent: 'center',
           background: 'var(--bg-page)'
         }}
       >

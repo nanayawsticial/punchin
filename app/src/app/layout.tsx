@@ -10,15 +10,20 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'PunchIn — Smart Attendance Tracking',
-  description: 'Real-time employee attendance tracking with hardware terminal integration. Clock in/out via web or RFID card.',
-  keywords: ['attendance', 'time tracking', 'RFID', 'HR', 'workforce management'],
+export const viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#F8F5F1' },
     { media: '(prefers-color-scheme: dark)',  color: '#0F1923' },
   ],
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+};
+
+export const metadata: Metadata = {
+  title: 'PunchIn — Smart Attendance Tracking',
+  description: 'Real-time employee attendance tracking with hardware terminal integration. Clock in/out via web or RFID card.',
+  keywords: ['attendance', 'time tracking', 'RFID', 'HR', 'workforce management'],
   manifest: '/manifest.json',
 };
 

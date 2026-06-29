@@ -3,7 +3,7 @@
 import React from 'react';
 import type { AttendanceRecord } from '@/types';
 import { StatusBadge } from './StatusBadge';
-import { Clock, MapPin, Edit, FileText } from 'lucide-react';
+import { Clock, MapPin, Edit, FileText, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 interface AttendanceCardProps {
@@ -33,7 +33,7 @@ export function AttendanceCard({ record, onEdit, showUser = false }: AttendanceC
                 background: 'var(--bg-elevated)',
                 display: 'flex',
                 alignItems: 'center',
-                justify-content: 'center',
+                justifyContent: 'center',
                 fontWeight: 700,
                 fontSize: 'var(--text-xs)',
                 color: 'var(--text-1)'
@@ -126,28 +126,5 @@ export function AttendanceCard({ record, onEdit, showUser = false }: AttendanceC
         </div>
       )}
     </div>
-  );
-}
-
-// Inline fallback for AlertCircle inside note view
-function AlertCircle(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="lucide lucide-alert-circle"
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" x2="12" y1="8" y2="12" />
-      <line x1="12" x2="12.01" y1="16" y2="16" />
-    </svg>
   );
 }

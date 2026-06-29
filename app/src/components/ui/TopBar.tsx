@@ -197,21 +197,21 @@ export function TopBar() {
 
         {/* User avatar / profile button */}
         {user && (
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              overflow: 'hidden',
-              background: 'var(--bg-elevated)',
-              display: 'flex',
-              alignItems: 'center',
-              justify-content: 'center',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 700,
-              color: 'var(--accent-text)',
-            }}
-          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                background: 'var(--bg-elevated)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 700,
+                color: 'var(--accent-text)',
+              }}
+            >
             {user.avatar ? (
               <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (

@@ -68,7 +68,7 @@ export default function ProfilePage() {
                 background: 'var(--accent-soft)',
                 display: 'flex',
                 alignItems: 'center',
-                justify-content: 'center',
+                justifyContent: 'center',
                 color: 'var(--accent)',
                 fontWeight: 800,
                 fontSize: 'var(--text-2xl)'
