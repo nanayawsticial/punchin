@@ -5,7 +5,7 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { useAuth } from '@/lib/auth-context';
 import { usersApi } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
-import { LogOut, Save, User, Shield, Phone, Mail } from 'lucide-react';
+import { LogOut, Save, User, Shield, Phone, Mail, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const PRESET_AVATARS = [
@@ -30,7 +30,8 @@ export default function ProfilePage() {
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    avatar: user?.avatar || ''
+    avatar: user?.avatar || '',
+    password: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -40,8 +41,19 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      await usersApi.update(user.id, form);
+      const payload: any = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        avatar: form.avatar,
+      };
+      if (form.password.trim() !== '') {
+        payload.password = form.password;
+      }
+
+      await usersApi.update(user.id, payload);
       showToast('Profile updated successfully!', 'success');
+      setForm(prev => ({ ...prev, password: '' }));
     } catch (err: any) {
       console.error(err);
       showToast(err.response?.data?.message || 'Failed to update profile.', 'danger');
@@ -151,6 +163,23 @@ export default function ProfilePage() {
                   style={{ paddingLeft: 44 }}
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label" htmlFor="password">New Password (leave blank to keep current)</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={16} style={{ position: 'absolute', left: 16, top: 18, color: 'var(--text-3)' }} />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter a new password..."
+                  className="input"
+                  style={{ paddingLeft: 44 }}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
                 />
               </div>
             </div>
