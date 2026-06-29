@@ -8,6 +8,19 @@ import { useToast } from '@/components/ui/Toast';
 import { LogOut, Save, User, Shield, Phone, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+const PRESET_AVATARS = [
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Aneka',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Jack',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Milo',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Toby',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Leo',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Buster',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Sasha',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Oliver',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=Luna',
+];
+
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
@@ -74,14 +87,14 @@ export default function ProfilePage() {
                 fontSize: 'var(--text-2xl)'
               }}
             >
-              {form.avatar ? (
+              {form.avatar && (form.avatar.startsWith('http') || form.avatar.startsWith('/') || form.avatar.includes('.')) ? (
                 <img
                   src={form.avatar}
                   alt={form.name}
                   style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
                 />
               ) : (
-                form.name.charAt(0).toUpperCase()
+                form.avatar || form.name.charAt(0).toUpperCase()
               )}
             </div>
 
@@ -143,16 +156,77 @@ export default function ProfilePage() {
             </div>
 
             <div className="input-group">
-              <label className="input-label" htmlFor="avatar">Profile Avatar URL</label>
-              <input
-                id="avatar"
-                name="avatar"
-                type="url"
-                placeholder="https://example.com/avatar.png"
-                className="input"
-                value={form.avatar}
-                onChange={(e) => setForm({ ...form, avatar: e.target.value })}
-              />
+              <label className="input-label">Select Profile Avatar</label>
+              
+              {/* Preset Avatars Grid */}
+              <div 
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))', 
+                  gap: 12, 
+                  margin: '12px 0', 
+                  padding: '8px',
+                  background: 'var(--bg-elevated)', 
+                  borderRadius: 'var(--radius-md)' 
+                }}
+              >
+                {PRESET_AVATARS.map((url, idx) => {
+                  const isSelected = form.avatar === url;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setForm({ ...form, avatar: url })}
+                      style={{
+                        padding: 0,
+                        border: isSelected ? '2px solid var(--accent)' : '2px solid transparent',
+                        borderRadius: '50%',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        transition: 'border-color var(--dur-base) var(--ease-out)',
+                        outline: 'none',
+                        width: 52,
+                        height: 52,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <img 
+                        src={url} 
+                        alt={`Avatar ${idx + 1}`} 
+                        style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} 
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Input or Randomizer */}
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12 }}>
+                <input
+                  id="avatar"
+                  name="avatar"
+                  type="url"
+                  placeholder="Custom avatar URL or Dicebear seed..."
+                  className="input"
+                  value={form.avatar}
+                  onChange={(e) => setForm({ ...form, avatar: e.target.value })}
+                />
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const randomSeed = Math.random().toString(36).substring(7);
+                    const randomUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${randomSeed}`;
+                    setForm({ ...form, avatar: randomUrl });
+                  }}
+                  className="btn btn-ghost"
+                  style={{ minHeight: 52, padding: '0 16px', fontSize: 'var(--text-xs)', whiteSpace: 'nowrap' }}
+                >
+                  Randomize
+                </button>
+              </div>
             </div>
 
             <div className="grid-2" style={{ marginTop: 8 }}>
