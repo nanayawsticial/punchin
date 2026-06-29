@@ -179,6 +179,7 @@ export default function DevicesPage() {
           title="Pair Physical Device"
           subtitle="Link RFID Terminal Ecosystem"
         >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', lineHeight: 1.5 }}>
               💡 {pairingStatus}
             </div>
