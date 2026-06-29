@@ -1,0 +1,23 @@
+{
+  "name": "PunchIn Attendance System",
+  "short_name": "PunchIn",
+  "description": "Real-time employee attendance tracking with hardware RFID terminal integration",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F5F1",
+  "theme_color": "#E8603C",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

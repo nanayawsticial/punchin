@@ -1,0 +1,255 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  ON_LEAVE
+}
+
+enum AttendanceMethod {
+  WEB
+  HARDWARE
+  MANUAL
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  UNKNOWN
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  MATERNITY
+  PATERNITY
+  EMERGENCY
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  joinCode  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users             User[]             @relation(onDelete: Cascade)
+  departments       Department[]       @relation(onDelete: Cascade)
+  attendanceRecords AttendanceRecord[] @relation(onDelete: Cascade)
+  biometricDevices  BiometricDevice[]  @relation(onDelete: Cascade)
+  geoFenceZones     GeoFenceZone[]     @relation(onDelete: Cascade)
+  leaveRequests     LeaveRequest[]     @relation(onDelete: Cascade)
+  shifts            Shift[]            @relation(onDelete: Cascade)
+  notifications     Notification[]     @relation(onDelete: Cascade)
+  publicHolidays    PublicHoliday[]    @relation(onDelete: Cascade)
+}
+
+model User {
+  id             String     @id @default(cuid())
+  name           String
+  email          String     @unique
+  passwordHash   String
+  role           Role       @default(EMPLOYEE)
+  employeeCode   String     @unique
+  departmentId   String?
+  organizationId String
+  avatar         String?
+  phone          String?
+  status         UserStatus @default(ACTIVE)
+  mfaEnabled     Boolean    @default(false)
+  mfaSecret      String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department        Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  sessions          Session[]          @relation(onDelete: Cascade)
+  attendanceRecords AttendanceRecord[] @relation(onDelete: Cascade)
+  deviceSyncLogs    DeviceSyncLog[]    @relation(onDelete: SetNull)
+  leaveRequests     LeaveRequest[]     @relation(onDelete: Cascade)
+  shifts            Shift[]            @relation(onDelete: Cascade)
+}
+
+model Department {
+  id             String   @id @default(cuid())
+  name           String
+  color          String   @default("#E8603C")
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users        User[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AttendanceRecord {
+  id               String           @id @default(cuid())
+  userId           String
+  date             String // yyyy-mm-dd
+  clockIn          DateTime?
+  clockOut         DateTime?
+  hoursWorked      Float?
+  status           AttendanceStatus @default(PRESENT)
+  method           AttendanceMethod @default(WEB)
+  latitude         Float?
+  longitude        Float?
+  notes            String?
+  correctedIn      DateTime?
+  correctedOut     DateTime?
+  correctionReason String?
+  correctedBy      String?
+  organizationId   String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model BiometricDevice {
+  id               String       @id @default(cuid())
+  name             String
+  deviceType       String       @default("RFID")
+  serialNumber     String       @unique
+  ipAddress        String?
+  location         String?
+  status           DeviceStatus @default(UNKNOWN)
+  lastSeenAt       DateTime?
+  lastSyncAt       DateTime?
+  apiKeyHash       String?
+  apiKeyLast4      String?
+  isActive         Boolean      @default(true)
+  organizationId   String
+  pairingCode      String?
+  pairingExpiresAt DateTime?
+  pairedAt         DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  syncLogs     DeviceSyncLog[] @relation(onDelete: Cascade)
+}
+
+model DeviceSyncLog {
+  id              String   @id @default(cuid())
+  deviceId        String
+  employeeCode    String?
+  userId          String?
+  eventType       String
+  eventTime       DateTime
+  terminalEventId String?  @unique
+  rawData         Json?
+  processed       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  device BiometricDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  user   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model GeoFenceZone {
+  id             String   @id @default(cuid())
+  name           String
+  latitude       Float
+  longitude      Float
+  radiusMeters   Float    @default(100)
+  isActive       Boolean  @default(true)
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id             String      @id @default(cuid())
+  userId         String
+  startDate      String // yyyy-mm-dd
+  endDate        String // yyyy-mm-dd
+  type           LeaveType
+  status         LeaveStatus @default(PENDING)
+  reason         String?
+  managerNotes   String?
+  organizationId String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Shift {
+  id             String   @id @default(cuid())
+  userId         String
+  date           String // yyyy-mm-dd
+  startTime      String // hh:mm
+  endTime        String // hh:mm
+  type           String   @default("REGULAR")
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  message        String
+  type           String   @default("info")
+  metadata       Json?
+  isRead         Boolean  @default(false)
+  targetRole     String?
+  userId         String?
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model PublicHoliday {
+  id             String   @id @default(cuid())
+  name           String
+  date           String // yyyy-mm-dd
+  type           String   @default("PUBLIC")
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
