@@ -158,3 +158,9 @@ export const organizationApi = {
   update: (data: Record<string, unknown>) =>
     api.patch('/api/organization', data).then(r => r.data),
 };
+
+// ── Payroll ───────────────────────────────────────────────────────────────────
+export const payrollApi = {
+  getSummary: (month?: string) => api.get('/api/payroll', { params: { month } }).then(r => r.data),
+  updateSalary: (userId: string, baseSalary: number) => api.patch(`/api/payroll/salary/${userId}`, { baseSalary }).then(r => r.data),
+};

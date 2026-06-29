@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Clock, Users, Calendar, User, Settings, Cpu } from 'lucide-react';
+import { Home, Clock, Users, Calendar, User, Settings, Cpu, CreditCard } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 const NAV_ITEMS = [
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/clock',     icon: Clock,    label: 'Clock' },
   { href: '/team',      icon: Users,    label: 'Team' },
   { href: '/history',   icon: Calendar, label: 'History' },
+  { href: '/payroll',   icon: CreditCard, label: 'Payroll' },
   { href: '/profile',   icon: User,     label: 'Profile' },
 ];
 
