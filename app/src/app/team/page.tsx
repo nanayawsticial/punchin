@@ -319,11 +319,19 @@ export default function TeamPage() {
 
                 <PresenceAvatar name={m.name} avatar={m.avatar} status={m.status} size={64} />
 
-                <div>
-                  <div className="font-bold truncate" style={{ fontSize: 'var(--text-sm)', maxWidth: 140, color: 'var(--text-1)' }}>
+                <div style={{ width: '100%', maxWidth: '100%', textAlign: 'center', padding: '0 8px', minWidth: 0 }}>
+                  <div 
+                    className="font-bold truncate" 
+                    title={m.name}
+                    style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)', width: '100%' }}
+                  >
                     {m.name}
                   </div>
-                  <div className="text-muted truncate" style={{ fontSize: 10, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-3)' }}>
+                  <div 
+                    className="text-muted truncate" 
+                    title={m.departmentName}
+                    style={{ fontSize: 10, marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-3)', width: '100%' }}
+                  >
                     {m.departmentName}
                   </div>
                 </div>
@@ -341,20 +349,28 @@ export default function TeamPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {filtered.map((m) => (
-              <div key={m.id} className="card card-sm flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
+              <div key={m.id} className="card card-sm flex items-center justify-between gap-3" style={{ minWidth: 0 }}>
+                <div className="flex items-center gap-3" style={{ minWidth: 0, flex: 1 }}>
                   <PresenceAvatar name={m.name} avatar={m.avatar} status={m.status} size={40} />
-                  <div>
-                    <div className="font-bold" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)' }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div 
+                      className="font-bold truncate" 
+                      title={m.name}
+                      style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)' }}
+                    >
                       {m.name}
                     </div>
-                    <div className="text-muted" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
+                    <div 
+                      className="text-muted truncate" 
+                      title={m.departmentName}
+                      style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}
+                    >
                       {m.departmentName}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
                   {m.clockInTime && (
                     <div className="text-muted" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
                       In: {new Date(m.clockInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

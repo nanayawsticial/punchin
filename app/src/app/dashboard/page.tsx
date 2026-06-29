@@ -281,7 +281,7 @@ export default function DashboardPage() {
                       status={record.status}
                       size={48}
                     />
-                    <span className="truncate" style={{ fontSize: 10, maxWidth: 64, fontWeight: 600, color: 'var(--text-2)' }}>
+                    <span className="truncate" style={{ display: 'inline-block', fontSize: 10, maxWidth: 64, fontWeight: 600, color: 'var(--text-2)', textAlign: 'center' }}>
                       {record.user?.name.split(' ')[0]}
                     </span>
                   </div>
