@@ -1,8 +1,21 @@
+// Import the default export correctly
+const withSerwistInit = require("@serwist/next").default;
+const withSerwist = withSerwistInit({
+  // Path to service worker source file (relative to project root)
+  swSrc: "./sw.ts",
+  // Destination for generated service worker in the public folder
+  swDest: "public/sw.js",
+});
+
+/** @type {import('next').NextConfig} */
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
-/** @type {import('next').NextConfig} */
+// Polyfill Node.js core modules for client-side bundles
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const webpack = require('webpack');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -21,6 +34,31 @@ const nextConfig = {
       },
     ];
   },
+  // Add webpack customization to include polyfills on client side
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Polyfill Node core modules
+      config.plugins.push(new NodePolyfillPlugin());
+      // Replace node: imports with bare module names
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, '');
+        })
+      );
+      // Provide fallbacks for core modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        path: require.resolve('path-browserify'),
+        util: require.resolve('util/'),
+        buffer: require.resolve('buffer/'),
+        fs: false,
+        module: false,
+      };
+    }
+    return config;
+  },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+module.exports = withSerwist(withBundleAnalyzer(nextConfig));

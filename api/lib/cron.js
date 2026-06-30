@@ -149,7 +149,33 @@ function initCronJobs() {
     }
   });
 
-  console.log('[CRON] Cron jobs initialized successfully.');
+  // 4. Daily database backup at 2:00 AM
+  cron.schedule('0 2 * * *', async () => {
+    console.log('[CRON] Starting daily backup...');
+    // Try pg_dump first
+    const { exec } = require('child_process');
+    exec('pg_dump --schema-only --no-owner --no-privileges', (error, stdout, stderr) => {
+      if (!error) {
+        const backupDir = require('path').resolve(__dirname, '..', 'backups');
+        const fs = require('fs');
+        if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filePath = require('path').join(backupDir, `backup-${timestamp}.sql`);
+        const dumpCommand = `pg_dump > "${filePath}"`;
+        exec(dumpCommand, (dumpErr) => {
+          if (dumpErr) {
+            console.error('[CRON] pg_dump failed, falling back to JSON backup.', dumpErr);
+            dumpDatabase();
+          } else {
+            console.log(`[CRON] pg_dump backup written to ${filePath}`);
+          }
+        });
+      } else {
+        console.warn('[CRON] pg_dump not available, using JSON fallback.');
+        dumpDatabase();
+      }
+    });
+  });
 }
 
 module.exports = { initCronJobs };
