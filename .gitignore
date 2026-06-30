@@ -16,3 +16,6 @@ coverage/
 *.tsbuildinfo
 prisma/migrations/dev.db
 *.db
+
+# Hardware Secrets
+hardware/secrets.py
