@@ -8,14 +8,14 @@ import json
 # ==============================================================================
 # 1. SECURITY LOCKDOWN
 # ==============================================================================
-# We use GPIO Pin 15 for Developer Mode override.
-# Connect a jumper wire between GP15 and GND *before* powering on the Pico to enable REPL.
-dev_pin = machine.Pin(15, machine.Pin.IN, machine.Pin.PULL_UP)
+# We use GPIO Pin 6 for Developer Mode override.
+# Connect a jumper wire between GP6 and GND *before* powering on the Pico to enable REPL.
+dev_pin = machine.Pin(6, machine.Pin.IN, machine.Pin.PULL_UP)
 
 if dev_pin.value() == 1:
     # Pin is HIGH (no jumper attached). Disable Ctrl+C interrupt.
     # This prevents attackers from stopping the script and accessing the filesystem via REPL.
-    print("[SECURITY] Normal Mode: REPL locked. Attach GP15 to GND to unlock.")
+    print("[SECURITY] Normal Mode: REPL locked. Attach GP6 to GND to unlock.")
     micropython.kbd_intr(-1)
 else:
     # Pin is LOW (jumper is attached to GND). Allow Ctrl+C.

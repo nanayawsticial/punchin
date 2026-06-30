@@ -18,7 +18,7 @@ For security, `main.py` explicitly **disables the `Ctrl+C` REPL interrupt** usin
 ### How to Edit Your Code (Developer Mode)
 Since REPL is locked, you must use the hardware override to edit your code:
 1. Unplug the Pico from USB power.
-2. Connect a jumper wire between **GPIO Pin 15 (GP15)** and **GND**.
+2. Connect a jumper wire between **GPIO Pin 6 (GP6)** and **GND**.
 3. Plug the Pico back into your computer.
 4. The system will detect the jumper and leave REPL unlocked. You can now use Thonny to stop the script, edit `secrets.py` or `main.py`, and save.
 5. Unplug, remove the jumper, and plug it back in to return to locked production mode.
