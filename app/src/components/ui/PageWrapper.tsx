@@ -17,12 +17,25 @@ interface PageWrapperProps {
 export function PageWrapper({ children, noSidebar = false }: PageWrapperProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { connected } = useSocket();
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (connected) {
+      setShowBanner(false);
+    } else {
+      const timer = setTimeout(() => {
+        setShowBanner(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [connected]);
 
   if (loading) {
     return (
@@ -39,20 +52,6 @@ export function PageWrapper({ children, noSidebar = false }: PageWrapperProps) {
       </div>
     );
   }
-
-  const { connected } = useSocket();
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    if (connected) {
-      setShowBanner(false);
-    } else {
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [connected]);
 
   if (!user) return null;
 
