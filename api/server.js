@@ -8,10 +8,12 @@ const { initCronJobs } = require('./lib/cron');
 // Register CORS
 fastify.register(require('@fastify/cors'), {
   origin: (origin, cb) => {
-    if (!origin || /localhost/.test(origin) || /vercel\.app$/.test(origin)) {
+    // Allow local development
+    if (!origin || /localhost/.test(origin)) {
       cb(null, true);
       return;
     }
+    // Strict production match
     if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       cb(null, true);
       return;
