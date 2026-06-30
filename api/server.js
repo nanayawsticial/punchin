@@ -1,7 +1,7 @@
 const pino = require('pino');
 const transport = pino.transport({
   target: 'pino-roll',
-  options: { destination: 'api/logs/app-%Y-%m-%d.log', interval: '1d', size: '10M' }
+  options: { file: 'logs/app-%Y-%m-%d.log', interval: '1d', size: '10M' }
 });
 const fastify = require('fastify')({
   logger: process.env.NODE_ENV !== 'production' ? transport : false

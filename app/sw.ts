@@ -1,10 +1,11 @@
 // app/sw.ts
-import withSerwist from "@serwist/next";
+import { installSerwist } from "@serwist/sw";
 
-export const serwist = withSerwist({
-// Precache of build assets is handled automatically.
-// Additional custom runtime caching can be implemented using Workbox APIs within the service worker.
+declare const self: any;
 
+installSerwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
 });
-
-export default serwist;

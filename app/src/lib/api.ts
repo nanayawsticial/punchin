@@ -125,6 +125,9 @@ export const geofenceApi = {
   list: () => api.get('/api/geofence').then(r => r.data),
   create: (data: Record<string, unknown>) =>
     api.post('/api/geofence', data).then(r => r.data),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/api/geofence/${id}`, data).then(r => r.data),
+  remove: (id: string) => api.delete(`/api/geofence/${id}`).then(r => r.data),
   validate: (lat: number, lng: number) =>
     api.post('/api/geofence/validate', { latitude: lat, longitude: lng }).then(r => r.data),
 };

@@ -4,31 +4,34 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Clock, Users, Calendar, User, Settings, Cpu, CreditCard } from 'lucide-react';
+import { Home, Clock, Users, Calendar, User, Settings, Cpu, CreditCard, MapPin } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-
-const NAV_ITEMS = [
-  { href: '/dashboard', icon: Home,     label: 'Home' },
-  { href: '/clock',     icon: Clock,    label: 'Clock' },
-  { href: '/team',      icon: Users,    label: 'Team' },
-  { href: '/history',   icon: Calendar, label: 'History' },
-  { href: '/payroll',   icon: CreditCard, label: 'Payroll' },
-  { href: '/profile',   icon: User,     label: 'Profile' },
-];
-
-const ADMIN_ITEMS = [
-  { href: '/devices',  icon: Cpu,      label: 'Devices' },
-  { href: '/settings', icon: Settings, label: 'Settings' },
-];
+ 
+ const NAV_ITEMS = [
+   { href: '/dashboard', icon: Home,     label: 'Home' },
+   { href: '/clock',     icon: Clock,    label: 'Clock' },
+   { href: '/team',      icon: Users,    label: 'Team' },
+   { href: '/history',   icon: Calendar, label: 'History' },
+   { href: '/payroll',   icon: CreditCard, label: 'Payroll' },
+   { href: '/profile',   icon: User,     label: 'Profile' },
+ ];
+ 
+ const ADMIN_ITEMS = [
+   { href: '/devices',  icon: Cpu,      label: 'Devices' },
+   { href: '/geofences', icon: MapPin,   label: 'Geofences' },
+   { href: '/settings', icon: Settings, label: 'Settings' },
+ ];
 
 export function BottomTabBar() {
   const pathname = usePathname();
   const { isAdmin } = useAuth();
 
+  const allItems = [...NAV_ITEMS, ...(isAdmin ? ADMIN_ITEMS : [])];
+
   return (
     <nav className="bottom-nav" aria-label="Main navigation">
       <div className="bottom-nav-items">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {allItems.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none' }}>

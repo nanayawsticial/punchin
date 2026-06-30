@@ -55,7 +55,12 @@ export function TopBar() {
     if (!socket) return;
 
     socket.on('notification:new', (notif: Notification) => {
-      setNotifications(prev => [notif, ...prev]);
+      const isForMe = (!notif.userId && !notif.targetRole) || 
+                      notif.userId === user?.id || 
+                      notif.targetRole === user?.role;
+      if (isForMe) {
+        setNotifications(prev => [notif, ...prev]);
+      }
     });
 
     return () => {

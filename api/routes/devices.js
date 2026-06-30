@@ -326,18 +326,21 @@ async function deviceRoutes(fastify, options) {
       return reply.status(403).send({ error: 'Forbidden', message: 'Invalid device key' });
     }
 
-    // Create a notification for admins
-    const notification = await prisma.notification.create({
-      data: {
-        message: `Unknown RFID card scanned: UID "${uid}" at terminal "${device.name}"`,
-        type: 'warning',
-        targetRole: 'ADMIN',
-        organizationId: device.organizationId,
-        metadata: { uid, deviceId: device.id, location: device.location }
-      }
-    });
+    // Create notifications for admins and managers
+    const targetRoles = ['ADMIN', 'MANAGER'];
+    for (const role of targetRoles) {
+      const notification = await prisma.notification.create({
+        data: {
+          message: `Unknown RFID card scanned: UID "${uid}" at terminal "${device.name}"`,
+          type: 'warning',
+          targetRole: role,
+          organizationId: device.organizationId,
+          metadata: { uid, deviceId: device.id, location: device.location }
+        }
+      });
+      emitToOrg(device.organizationId, 'notification:new', notification);
+    }
 
-    emitToOrg(device.organizationId, 'notification:new', notification);
     emitToOrg(device.organizationId, 'device:unknown-card', { uid, deviceId: device.id });
 
     return { success: true };
