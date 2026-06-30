@@ -7,7 +7,7 @@ const { processHardwarePunch, validateApiKey } = require('../lib/hardware');
 async function attendanceRoutes(fastify, options) {
   // GET /api/attendance
   fastify.get('/', { preHandler: authenticate }, async (request, reply) => {
-    const { userId, date, startDate, endDate, status } = request.query;
+    const { userId, date, startDate, endDate, status, limit, page } = request.query;
     const organizationId = request.user.organizationId;
 
     const where = { organizationId };
@@ -22,6 +22,10 @@ async function attendanceRoutes(fastify, options) {
       if (startDate) where.date.gte = startDate;
       if (endDate) where.date.lte = endDate;
     }
+
+    const parsedLimit = parseInt(limit || '100', 10);
+    const parsedPage = parseInt(page || '1', 10);
+    const skip = (parsedPage - 1) * parsedLimit;
 
     const records = await prisma.attendanceRecord.findMany({
       where,
@@ -40,7 +44,9 @@ async function attendanceRoutes(fastify, options) {
       orderBy: [
         { date: 'desc' },
         { clockIn: 'desc' }
-      ]
+      ],
+      take: parsedLimit,
+      skip: skip
     });
 
     return records;

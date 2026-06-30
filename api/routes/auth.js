@@ -34,7 +34,14 @@ async function generateJoinCode() {
 
 async function authRoutes(fastify, options) {
   // POST /api/auth/signup - Creates new organization + SUPER_ADMIN user
-  fastify.post('/signup', async (request, reply) => {
+  fastify.post('/signup', {
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '1 minute'
+      }
+    }
+  }, async (request, reply) => {
     const { name, email, password, organizationName } = request.body;
 
     if (!name || !email || !password || !organizationName) {
@@ -98,7 +105,14 @@ async function authRoutes(fastify, options) {
   });
 
   // POST /api/auth/join - Joins existing organization with joinCode
-  fastify.post('/join', async (request, reply) => {
+  fastify.post('/join', {
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '1 minute'
+      }
+    }
+  }, async (request, reply) => {
     const { name, email, password, joinCode } = request.body;
 
     if (!name || !email || !password || !joinCode) {
@@ -161,7 +175,14 @@ async function authRoutes(fastify, options) {
   });
 
   // POST /api/auth/login
-  fastify.post('/login', async (request, reply) => {
+  fastify.post('/login', {
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '1 minute'
+      }
+    }
+  }, async (request, reply) => {
     const { email, password } = request.body;
 
     if (!email || !password) {

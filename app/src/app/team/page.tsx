@@ -8,6 +8,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { departmentsApi, attendanceApi, usersApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/components/ui/Toast';
+import { useSocket } from '@/lib/socket-context';
 import type { Department, User } from '@/types';
 import { Search, Grid, List, Edit2, User as UserIcon, Phone, Mail, Save } from 'lucide-react';
 
@@ -24,6 +25,7 @@ interface TeamMember {
 export default function TeamPage() {
   const { user: currentUser } = useAuth();
   const { showToast } = useToast();
+  const { socket } = useSocket();
   
   const [departments, setDepartments] = useState<Department[]>([]);
   const [activeDept, setActiveDept] = useState<string>('all');
@@ -126,6 +128,46 @@ export default function TeamPage() {
   useEffect(() => {
     loadTeamData();
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onClockIn = (data: { record: any; user: any }) => {
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === data.user.id
+            ? {
+                ...m,
+                status: data.record.status,
+                clockInTime: data.record.clockIn
+              }
+            : m
+        )
+      );
+    };
+
+    const onClockOut = (data: { record: any; user: any }) => {
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === data.user.id
+            ? {
+                ...m,
+                status: 'ABSENT',
+                clockInTime: null
+              }
+            : m
+        )
+      );
+    };
+
+    socket.on('attendance:clockIn', onClockIn);
+    socket.on('attendance:clockOut', onClockOut);
+
+    return () => {
+      socket.off('attendance:clockIn', onClockIn);
+      socket.off('attendance:clockOut', onClockOut);
+    };
+  }, [socket]);
 
   const handleEditClick = async (member: TeamMember) => {
     setEditingMember(member);

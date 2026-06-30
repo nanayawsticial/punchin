@@ -99,6 +99,9 @@ model User {
   deviceSyncLogs    DeviceSyncLog[]    
   leaveRequests     LeaveRequest[]     
   shifts            Shift[]            
+
+  @@index([organizationId])
+  @@index([departmentId])
 }
 
 model Department {
@@ -110,6 +113,8 @@ model Department {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   users        User[]
+
+  @@index([organizationId])
 }
 
 model Session {
@@ -120,6 +125,8 @@ model Session {
   createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AttendanceRecord {
@@ -144,6 +151,10 @@ model AttendanceRecord {
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@unique([userId, date])
 }
 
 model BiometricDevice {
@@ -168,6 +179,8 @@ model BiometricDevice {
 
   organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   syncLogs     DeviceSyncLog[] 
+
+  @@index([organizationId])
 }
 
 model DeviceSyncLog {
@@ -184,6 +197,9 @@ model DeviceSyncLog {
 
   device BiometricDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   user   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId])
+  @@index([userId])
 }
 
 model GeoFenceZone {
@@ -197,6 +213,8 @@ model GeoFenceZone {
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }
 
 model LeaveRequest {
@@ -214,6 +232,9 @@ model LeaveRequest {
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Shift {
@@ -228,6 +249,9 @@ model Shift {
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Notification {
@@ -242,6 +266,9 @@ model Notification {
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model PublicHoliday {
@@ -253,4 +280,6 @@ model PublicHoliday {
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }

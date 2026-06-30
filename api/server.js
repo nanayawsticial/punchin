@@ -22,6 +22,17 @@ fastify.register(require('@fastify/cors'), {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 });
 
+// Register security headers (Helmet)
+fastify.register(require('@fastify/helmet'), {
+  contentSecurityPolicy: false // Disable CSP so custom font/scripts don't get blocked in development
+});
+
+// Register Rate Limiting (Global fallback: 100 requests/minute)
+fastify.register(require('@fastify/rate-limit'), {
+  max: 100,
+  timeWindow: '1 minute'
+});
+
 // Register JWT plugin
 fastify.register(require('@fastify/jwt'), {
   secret: process.env.JWT_SECRET || 'fallback-access-secret'
@@ -79,6 +90,7 @@ const start = async () => {
 
     // Attach Socket.io to Fastify server instance
     const io = socketio(fastify.server, {
+      maxHttpBufferSize: 1e6, // 1MB limit to protect against oversized payloads
       cors: {
         origin: (origin, cb) => {
           if (!origin || /localhost/.test(origin) || /vercel\.app$/.test(origin)) {

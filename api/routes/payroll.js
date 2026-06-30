@@ -54,7 +54,7 @@ async function payrollRoutes(fastify, options) {
       };
     }
 
-    // If ADMIN/MANAGER/SUPER_ADMIN: Return organization-wide payroll sheet
+    // Fetch all users
     const users = await prisma.user.findMany({
       where: {
         organizationId,
@@ -66,17 +66,27 @@ async function payrollRoutes(fastify, options) {
       orderBy: { name: 'asc' }
     });
 
-    const payrollRecords = await Promise.all(users.map(async (u) => {
-      const records = await prisma.attendanceRecord.findMany({
-        where: {
-          userId: u.id,
-          organizationId,
-          date: { startsWith: queryMonth }
-        }
-      });
+    // Fetch ALL attendance records for the organization in this month in one single query
+    const allRecords = await prisma.attendanceRecord.findMany({
+      where: {
+        organizationId,
+        date: { startsWith: queryMonth }
+      }
+    });
 
-      const lateDays = records.filter(r => r.status === 'LATE').length;
-      const presentDays = records.filter(r => r.status === 'PRESENT' || r.status === 'LATE' || r.status === 'HALF_DAY').length;
+    // Group records by userId in memory
+    const recordsByUser = {};
+    allRecords.forEach(record => {
+      if (!recordsByUser[record.userId]) {
+        recordsByUser[record.userId] = [];
+      }
+      recordsByUser[record.userId].push(record);
+    });
+
+    const payrollRecords = users.map((u) => {
+      const uRecords = recordsByUser[u.id] || [];
+      const lateDays = uRecords.filter(r => r.status === 'LATE').length;
+      const presentDays = uRecords.filter(r => r.status === 'PRESENT' || r.status === 'LATE' || r.status === 'HALF_DAY').length;
       const baseSalary = u.baseSalary || 0;
       const deductions = lateDays * 14.00;
       const netSalary = Math.max(0, baseSalary - deductions);
@@ -94,7 +104,7 @@ async function payrollRoutes(fastify, options) {
         netSalary,
         role: u.role
       };
-    }));
+    });
 
     return {
       isManager: true,

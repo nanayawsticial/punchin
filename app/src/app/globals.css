@@ -3,7 +3,7 @@
    Font: Plus Jakarta Sans (Google Fonts, loaded in layout.tsx)
 ───────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
 
 /* ── Color Tokens ─────────────────────────────────────────────────────── */
 :root {
@@ -17,7 +17,7 @@
   --navy:           #1B2E4B;
   --text-1:         #1A2332;
   --text-2:         #3D4A5C;
-  --text-3:         #7A8799;
+  --text-3:         #627285;
   --success:        #2D7A4F;
   --success-soft:   #E8F5EE;
   --warning:        #C47B1A;
@@ -68,7 +68,7 @@
   --navy:           #F0EEE8;
   --text-1:         #EAE8E4;
   --text-2:         #C8D4E0;
-  --text-3:         #6B7D8F;
+  --text-3:         #8B9EAF;
   --success:        #4CAF7D;
   --success-soft:   #0D2B1C;
   --warning:        #F5A623;
@@ -87,6 +87,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 3px;
 }
 
 html {
@@ -977,3 +986,17 @@ a:hover { text-decoration: underline; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .overflow-hidden { overflow: hidden; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Accessibility: Prefers Reduced Motion ───────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+    transition-delay: -1ms !important;
+  }
+}
+
