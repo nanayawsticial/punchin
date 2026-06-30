@@ -7,7 +7,26 @@ import { useToast } from '@/components/ui/Toast';
 import { geofenceApi } from '@/lib/api';
 import type { GeoFenceZone } from '@/types';
 import { MapPin, Plus, Edit2, Trash2, Crosshair, HelpCircle, Check, X } from 'lucide-react';
-import GeofenceMap from '@/components/ui/GeofenceMap';
+import dynamic from 'next/dynamic';
+
+const GeofenceMap = dynamic(() => import('@/components/ui/GeofenceMap'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'var(--bg-elevated)',
+      color: 'var(--text-3)',
+      fontSize: 'var(--text-sm)',
+      borderRadius: 'var(--radius-md)'
+    }}>
+      Loading Map Component...
+    </div>
+  )
+});
 
 // Default center coordinates if map has no data (e.g. Accra, Ghana or somewhere general)
 const DEFAULT_LAT = 5.6037;
