@@ -13,8 +13,8 @@ const { initCronJobs } = require('./lib/cron');
 // Register CORS
 fastify.register(require('@fastify/cors'), {
   origin: (origin, cb) => {
-    // Allow local development
-    if (!origin || /localhost/.test(origin)) {
+    // Allow local development and Vercel deployments/previews
+    if (!origin || /localhost/.test(origin) || /127\.0\.0\.1/.test(origin) || /vercel\.app$/.test(origin)) {
       cb(null, true);
       return;
     }

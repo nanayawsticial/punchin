@@ -24,9 +24,14 @@ import { useAuth } from '@/lib/auth-context';
 
 export function BottomTabBar() {
   const pathname = usePathname();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManager } = useAuth();
 
-  const allItems = [...NAV_ITEMS, ...(isAdmin ? ADMIN_ITEMS : [])];
+  const allItems = [
+    ...NAV_ITEMS,
+    ...(isAdmin ? [{ href: '/devices', icon: Cpu, label: 'Devices' }] : []),
+    ...(isManager ? [{ href: '/geofences', icon: MapPin, label: 'Geofences' }] : []),
+    ...(isAdmin ? [{ href: '/settings', icon: Settings, label: 'Settings' }] : []),
+  ];
 
   return (
     <nav className="bottom-nav" aria-label="Main navigation">
@@ -65,9 +70,14 @@ export function BottomTabBar() {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManager } = useAuth();
 
-  const allItems = [...NAV_ITEMS, ...(isAdmin ? ADMIN_ITEMS : [])];
+  const allItems = [
+    ...NAV_ITEMS,
+    ...(isAdmin ? [{ href: '/devices', icon: Cpu, label: 'Devices' }] : []),
+    ...(isManager ? [{ href: '/geofences', icon: MapPin, label: 'Geofences' }] : []),
+    ...(isAdmin ? [{ href: '/settings', icon: Settings, label: 'Settings' }] : []),
+  ];
 
   return (
     <aside className="sidebar" aria-label="Sidebar navigation">

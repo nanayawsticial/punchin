@@ -1,5 +1,5 @@
 const prisma = require('../lib/prisma');
-const { authenticate, requireAdmin } = require('../middleware/auth');
+const { authenticate, requireManager } = require('../middleware/auth');
 const { isWithinZone } = require('../lib/geofence');
 
 async function geofenceRoutes(fastify, options) {
@@ -13,8 +13,8 @@ async function geofenceRoutes(fastify, options) {
     return zones;
   });
 
-  // POST /api/geofence - Create geofence zone (Admin only)
-  fastify.post('/', { preHandler: requireAdmin }, async (request, reply) => {
+  // POST /api/geofence - Create geofence zone (Manager/Admin only)
+  fastify.post('/', { preHandler: requireManager }, async (request, reply) => {
     const { name, latitude, longitude, radiusMeters, isActive } = request.body;
     const organizationId = request.user.organizationId;
 
@@ -54,8 +54,8 @@ async function geofenceRoutes(fastify, options) {
      return result;
    });
  
-   // PATCH /api/geofence/:id - Update geofence details (Admin only)
-   fastify.patch('/:id', { preHandler: requireAdmin }, async (request, reply) => {
+   // PATCH /api/geofence/:id - Update geofence details (Manager/Admin only)
+   fastify.patch('/:id', { preHandler: requireManager }, async (request, reply) => {
      const { id } = request.params;
      const { name, latitude, longitude, radiusMeters, isActive } = request.body;
      const organizationId = request.user.organizationId;
@@ -79,8 +79,8 @@ async function geofenceRoutes(fastify, options) {
      return updated;
    });
  
-   // DELETE /api/geofence/:id - Delete geofence zone (Admin only)
-   fastify.delete('/:id', { preHandler: requireAdmin }, async (request, reply) => {
+   // DELETE /api/geofence/:id - Delete geofence zone (Manager/Admin only)
+   fastify.delete('/:id', { preHandler: requireManager }, async (request, reply) => {
      const { id } = request.params;
      const organizationId = request.user.organizationId;
  
