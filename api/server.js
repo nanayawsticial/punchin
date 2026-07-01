@@ -1,10 +1,12 @@
-const pino = require('pino');
-const transport = pino.transport({
-  target: 'pino-roll',
-  options: { file: 'logs/app-%Y-%m-%d.log', interval: '1d', size: '10M' }
-});
 const fastify = require('fastify')({
-  logger: process.env.NODE_ENV !== 'production' ? transport : false
+  logger: process.env.NODE_ENV !== 'production'
+    ? {
+        transport: {
+          target: 'pino-roll',
+          options: { file: 'logs/app-%Y-%m-%d.log', interval: '1d', size: '10M' }
+        }
+      }
+    : { level: 'info' }
 });
 const socketio = require('socket.io');
 const { setIO } = require('./lib/socket');
